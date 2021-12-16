@@ -1,0 +1,60 @@
+{
+  "name": "seap-uta_frontend",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "homepage": "/react/",
+  "description": "Editor de código con ambiente virtual utilizando React, Ace, Flux, and Convergence",
+  "keywords": [
+    "realtime",
+    "collaboration",
+    "ace",
+    "convergence",
+    "react",
+    "flux"
+  ],
+  "dependencies": {
+    "@convergence/ace-collab-ext": "0.4.0",
+    "@convergence/color-assigner": "0.3.0",
+    "@convergence/convergence": "1.0.0-rc.11",
+    "ace-builds": "1.4.3",
+    "caniuse-lite": "^1.0.30001282",
+    "classnames": "2.2.6",
+    "flux": "3.0.0",
+    "font-awesome": "4.6.3",
+    "moment": "2.24.0",
+    "node-sass": "^4.14.1",
+    "prop-types": "^15.7.2",
+    "rc-dialog": "7.3.0",
+    "rc-slider": "8.6.7",
+    "react": "16.8.4",
+    "react-dom": "16.8.4",
+    "react-onclickoutside": "6.8.0",
+    "react-scripts": "3.4.1",
+    "react-split-pane": "0.1.85",
+    "react-uikit-icons": "2.0.2"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
