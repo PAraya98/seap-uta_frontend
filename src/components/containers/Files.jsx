@@ -7,7 +7,9 @@ export default class Files extends React.Component {
   static propTypes = {
     rtModel: PropTypes.object.isRequired,
     port_machine: PropTypes.number.isRequired,
-    editable: PropTypes.bool.isRequired
+    rol: PropTypes.string.isRequired,
+    token: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired
   };
 
   constructor(props) {
@@ -39,7 +41,7 @@ export default class Files extends React.Component {
   };
 
   render() {
-    return <FileManager {...this.state } editable={this.props.editable}/>;
+    return <FileManager {...this.state } rol={this.props.rol} token={this.props.token} rtModel={this.props.rtModel} username={this.props.username}/>;
   }
 }
 

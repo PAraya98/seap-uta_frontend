@@ -9,7 +9,7 @@ import ParticipantsList from './participants/ParticipantsList.jsx';
 import GroupChatPane from './chat/GroupChatPane.jsx';
 import Banner from './Banner.jsx';
 
-export default function Home({rtModel, chatRoom, domain, activity, onClose, onLogout, user, port_machine, editable}) {
+export default function Home({rtModel, chatRoom, domain, activity, onClose, onLogout, user, port_machine, rol, token}) {
   const displayName = user.displayName ? user.displayName : user.username;  
   const mv = "/webssh2/ssh/host/localhost?port="+port_machine;
   return (
@@ -23,14 +23,14 @@ export default function Home({rtModel, chatRoom, domain, activity, onClose, onLo
         
         <div className="top-pane">
           <SplitPanel direction="horizontal" defaultSize={200}>
-            <Files rtModel={rtModel} port_machine={port_machine} editable = {editable}/>
+            <Files rtModel={rtModel} port_machine={port_machine} rol = {rol} token = {token} username={displayName}/> 
             
             <SplitPanel direction="horizontal" defaultSize={200} primary="second">
 
               <Editors 
                 rtModel={rtModel} 
                 port_machine={port_machine}
-                editable = {editable}
+                rol = {rol}
               />
 
               <div className="right-pane">

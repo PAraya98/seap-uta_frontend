@@ -6,12 +6,16 @@ import ActionButton from './ActionButton.jsx';
 import TreeView from './TreeView.jsx';
 import { TREE_ROOT_ID } from '../../constants/tree';
 import ConfirmationDialog from '../util/ConfirmationDialog';
+import MembersDialog from './MembersDialog.jsx';
 
 export default class FileManager extends React.Component {
   static propTypes = {
     treeNodes: PropTypes.object.isRequired,
     treeState: PropTypes.object.isRequired,
-    editable: PropTypes.bool.isRequired
+    rol: PropTypes.string.isRequired,
+    rtModel: PropTypes.object.isRequired,    
+    token: PropTypes.string.isRequired,
+    username: PropTypes.string.isRequired
   };
 
   constructor(props) {
@@ -20,7 +24,8 @@ export default class FileManager extends React.Component {
     this.rootId = TREE_ROOT_ID;
 
     this.state = {
-      showDeleteConfirm: false
+      showDeleteConfirm: false,
+      visibleMembersDialog: false
     };
   }
 
@@ -55,8 +60,8 @@ export default class FileManager extends React.Component {
       const selectedId = this.props.treeState.selectedId;
       const folder = this.props.treeNodes.get(selectedId);
       const nodeName = folder.get('name').value();
-      const title = "Confirm Delete";
-      const message = `Delete folder "${nodeName}"?`;
+      const title = "Confirmar eliminación";
+      const message = `Borrar la carpeta "${nodeName}"?`;
       return (<ConfirmationDialog
         onCancel={this.handleDeleteFolderCancel}
         onOk={this.handleDeleteFolderOk}
@@ -65,13 +70,33 @@ export default class FileManager extends React.Component {
       />);
     }
   }
-  handlemembers(){} // TODO: CREAR VISTA DE MIEMBROS - EN CASO DE CREADOR>ADMIN PUEDE MODIFICAR - EN OTRO CASO PUEDE VER
+
+  handleMembersDialog = () => {
+    this.setState({visibleMembersDialog: true});
+  }
+
+  _createMembersDialog() {
+    console.log(this.state.visibleMembersDialog)
+    if (this.state.visibleMembersDialog) {
+      return (<MembersDialog
+        title={"Miembros del repositorio"}
+        token={this.props.token}
+        rol={this.props.rol}
+        modelId={this.props.rtModel.modelId()}
+        onClose={this.handleMembersDialogClose}
+        username={this.props.username}
+      />);
+    }
+  }
+
+  handleMembersDialogClose = () => {
+    this.setState({visibleMembersDialog: false});
+  }
 
   render() {
+    const createMembersDialog = this._createMembersDialog();
     const folder = this.props.treeNodes.get(this.rootId);
     const selectedId = this.props.treeState.selectedId;
-    const admin = true; //TODO: AGREGAR AL SOLICITAR EL REPOSITORIO
-
     let is_folder;
     try {
       is_folder = this.props.treeNodes.get(selectedId).get('children').value() !== undefined;
@@ -80,16 +105,16 @@ export default class FileManager extends React.Component {
     }
     const deleteBtnStyle = {display: (!selectedId || selectedId === this.rootId) ? 'none' : 'inline'};
     const newelementBtnStyle = {display: (!(!selectedId || selectedId === this.rootId) && !is_folder) ? 'none' : 'inline'};
-    const addmemberBtnStyle = {display: !admin ? 'none' : 'inline'}
+    const addmemberBtnStyle = {display: 'inline'}
 
-    return (this.props.editable ?
+    return (this.props.rol !== "Lector" ?
        <div className="file-manager">
         <div className="section-title">Repositorio</div>
         <div className="file-actions">
           
         <button  
             className="icon-button"
-            onClick={this.handlemembers}  // TODO: https://github.com/cornflourblue/react-hook-form-crud-example
+            onClick={this.handleMembersDialog}  
             title="Ver miembros"
             style={addmemberBtnStyle}
             type="button"  
@@ -133,23 +158,24 @@ export default class FileManager extends React.Component {
             defaultCollapsed={false} 
             folder={folder} 
             folderId={this.rootId}
-            editable={this.props.editable}
+            editable={this.props.rol !== "Lector"}
             {...this.props} />
         </div>
         { this.renderConfirmDeleteNode() }
+        {createMembersDialog}
       </div> 
       :           
       <div className="file-manager">
         <div className="section-title">Repositorio</div>
         <div className="file-actions">
-          <button 
+        <button  
             className="icon-button"
-            onClick={this.handlemembers} 
+            onClick={this.handleMembersDialog}  
             title="Ver miembros"
             style={addmemberBtnStyle}
             type="button"  
           >
-            <i className="fa fa-lg fa-users" />
+            <i className="fa fa-lg fa-users " />
           </button>
         </div>
         
@@ -159,10 +185,12 @@ export default class FileManager extends React.Component {
             defaultCollapsed={false} 
             folder={folder} 
             folderId={this.rootId}
-            editable={this.props.editable}
+            editable={this.props.rol !== "Lector"}
             {...this.props} />
         </div>
+        {createMembersDialog}
       </div>
+      
 
     );
   }

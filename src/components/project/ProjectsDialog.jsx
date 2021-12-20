@@ -17,6 +17,8 @@ export default class ProjectsDialog extends React.Component {
     modelService: PropTypes.object.isRequired,
     onLogout: PropTypes.func.isRequired,
     onOpen: PropTypes.func.isRequired,
+    token: PropTypes.string.isRequired,
+    username:PropTypes.string.isRequired
   };
 
   constructor(props) {
@@ -26,6 +28,9 @@ export default class ProjectsDialog extends React.Component {
       loaded: false,
       opening: false,
       projects: [],
+      our_repo: [],
+      my_repo: [],
+      pub_repo: [],
       selected: null,
       deleteProjectVisible: false
     };
@@ -43,17 +48,34 @@ export default class ProjectsDialog extends React.Component {
     return false;
   }
 
-  _loadProjects() { //TODO: cambiar a repositorios propios del usuario
-    this.props.modelService.query(`SELECT FROM ${PROJECT_COLLECTION_ID}`).then((result) => {
-      // fixme we need some projections here so I can get back specific data.
-      const projects = result.data.map((model) => {
-        return {
-          name: model.data.name,
-          id: model.modelId
-        };
+  _loadProjects() {
+    this.setState({loaded: false});
+    new Promise(() => {
+      fetch('/ssh_handler/repository_list', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'token': this.props.token
+        }),
+      }).then((response) => {
+        if(response.ok) {
+          return response.json();
+        } else {
+          this.setState({message: "Error en el servidor!", inProgress: false});
+        }
+      })
+      .then((json) => {
+        if(json.message === "Lista enviada!")
+        {   this.setState({my_repo: json.my_repo, our_repo: json.our_repo, pub_repo: json.pub_repo, loaded: true, selected: null});
+        }
+        else
+        { console.log("error?")
+          this.setState({loaded: false, selected: null});
+        }
       });
-
-      this.setState({projects: projects, loaded: true});
     });
   }
 
@@ -87,26 +109,79 @@ export default class ProjectsDialog extends React.Component {
     this.setState({newProjectVisible: false});
   }
 
-  handleNewProjectOk = (projectName) => {
-    this.setState({newProjectVisible: false});
-    this.props.modelService.create({
-      collection: PROJECT_COLLECTION_ID,
-      data: {
-        "name": projectName,
-        "tree": {
-          "nodes": {
-            "root": {
-              "name": projectName,
-              "children": [],
-              "path": projectName
-            }
-          }
+  handleNewProjectOk = (projectName, visibility) => { // VERIFICAR SI PERTENECE AL REPOSITORIO, SINO ERROR 
+    new Promise(resolve => {
+      fetch('/ssh_handler/validate-jwt', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'token': this.props.token
+        }),
+      }).then((response) => {
+        if(response.ok) {
+          return response.json();
+        } else {
+          this.setState({message: "Error en el servidor!", inProgress: false});
         }
-      }
-    }).then(modelId => {
-      this.handleOpenProject(modelId);
-    });
+      })
+      .then((json) => {
+        if(json.bool)
+        {   this.setState({newProjectVisible: false});
+            this.props.modelService.create({
+              collection: PROJECT_COLLECTION_ID,
+              data: {
+                "name": projectName,
+                "tree": {
+                  "nodes": {
+                    "root": {
+                      "name": projectName,
+                      "children": [],
+                      "path": projectName
+                    }
+                  }
+                }
+              }
+            }).then(modelId => { 
+              fetch('/ssh_handler/create_repository', {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  'token': this.props.token,
+                  'username': this.props.username,
+                  'model_id': modelId,
+                  'name': projectName,
+                  'visibility': visibility
+                }),
+              }).then((response) => {
+                if(response.ok) {
+                  return response.json();
+                } else {
+                  this.setState({message: "Error en el servidor!", inProgress: false});
+                }
+              })
+              .then((json) => {
+                
+                if(json.message === "Creación realizada!")
+                { this.handleOpenProject(modelId)
 
+                }
+                else
+                { this.prop.onLogout();
+                }
+              })
+            });
+        }
+        else
+        { this.prop.onLogout();
+        }
+      });
+    });
   }
 
   _createNewProjectDialog() {
@@ -122,17 +197,55 @@ export default class ProjectsDialog extends React.Component {
     this.setState({deleteProjectVisible: false});
   }
 
-  handleDeleteProjectOk = () => { // TODO: ELIMINAR ELEMENTOS DEL PROYECTO
-    this.props.modelService.remove(this.state.selected).then(() => {
-      this.setState({deleteProjectVisible: false});
-      this._loadProjects();
-    });
-  }
+  handleDeleteProjectOk = () => { 
+    new Promise(() => {
+      fetch('/ssh_handler/delete_repository', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'token': this.props.token,
+          'username': this.props.username,
+          'modelId': this.state.selected
+        }),
+      }).then((response) => {
+        if(response.ok) {
+          return response.json();
+        } else {
+          this.setState({message: "Error en el servidor!", inProgress: false});
+        }
+      })
+      .then((json) => {
+        if(json.message === "Eliminación realizada!")
+        {   this.props.modelService.remove(this.state.selected).then(() => {
+              this.setState({deleteProjectVisible: false});
+              this._loadProjects();
+            });
+        }
+        else
+        { console.log("No eres el creador del repositorio!")
+          this.setState({deleteProjectVisible: false, selected: null})
+        }
+      });
+    });  
+
+
+
+      //EN CASO DE QUE SEA ACEPTADO
+
+
+}
 
   _createDeleteProjectDialog() {
     if (this.state.deleteProjectVisible) {
       const title = "Confirmar eliminación";
-      const message = `Borrar repositorio "${this.state.selected}"?`;
+      const array = [];
+      Array.prototype.push.apply(array, this.state.my_repo);
+      Array.prototype.push.apply(array, this.state.our_repo);
+      Array.prototype.push.apply(array, this.state.pub_repo);
+      const message = `Borrar repositorio "${(array.find(o => o.id === this.state.selected).name).split("<separator>")[0]}"?`;
       return (<ConfirmationDialog
         onCancel={this.handleDeleteProjectCancel}
         onOk={this.handleDeleteProjectOk}
@@ -142,20 +255,36 @@ export default class ProjectsDialog extends React.Component {
     }
   }
 
+
   render() {
     const newProjectDialog = this._createNewProjectDialog();
     const deleteProjectDialog = this._createDeleteProjectDialog();
+    let creador = false;
+    if(this.state.loaded && this.state.selected !== null)
+    {   const array = [];
+        Array.prototype.push.apply(array, this.state.my_repo);
+        Array.prototype.push.apply(array, this.state.our_repo);
+        Array.prototype.push.apply(array, this.state.pub_repo);
+        creador = array.find(o => o.id === this.state.selected).role === "Creador";
+    }
+
     return (
       <div>
         <CenteredPanel>
           <div className="projects-dialog">
             <div className="title">
               <img src={logo} alt="Convergence" />
-              <span>Repositorios</span>
               <i className="fa fa-power-off" onClick={this.props.onLogout} />
+              <span style={{textAlign: 'center', alignSelf: 'center'}} > SEAP-UTA </span> 
+              
+
+              
+              <span style={{textAlign: 'center'}}>Bienvenido {this.props.username} !</span>
             </div>
             <ProjectsList
-              projects={this.state.projects}
+              my_repo= {this.state.my_repo}
+              our_repo= {this.state.our_repo}
+              pub_repo= {this.state.pub_repo}
               onOpen={this.handleOpenProject}
               onSelect={this.handleSelectProject}
               loaded={this.state.loaded}
@@ -163,8 +292,8 @@ export default class ProjectsDialog extends React.Component {
             <div className="buttons">
               <button disabled={this.state.selected === null} className="app-button" onClick={this.handleOpen}>Abrir
               </button>
-              <button className="app-button" onClick={this.handleNew}>Nuevo</button>
-              <button disabled={this.state.selected === null} className="app-button" onClick={this.handleDelete}>Borrar
+              <button className="app-button" onClick={this.handleNew}>Crear nuevo repositorio</button>
+              <button disabled={this.state.selected === null || !creador} className="app-button" onClick={this.handleDelete}>Borrar
               </button>
             </div>
           </div>

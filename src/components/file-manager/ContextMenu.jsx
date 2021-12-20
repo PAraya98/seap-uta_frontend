@@ -9,9 +9,9 @@ export function FileContextMenu(props) {
     <Popover display onHide={props.onHide}>
       <div className="context-menu" onClick={props.onHide}>
         <ul>
-          <li onClick={props.onSelectOpen}>Abrir</li>
-          <li onClick={props.onSelectRename}>Renombrar...</li>
-          <li onClick={props.onSelectDelete}>Borrar...</li>
+          <li onClick={props.onSelectOpen}>Abrir archivo</li>
+          <li onClick={props.onSelectRename}>Renombrar archivo</li>
+          <li onClick={props.onSelectDelete}>Eliminar archivo</li>
         </ul>
       </div> 
     </Popover> : null
@@ -31,8 +31,8 @@ export function FolderContextMenu(props) {
     <Popover display onHide={props.onHide}>
       <div className="context-menu" onClick={props.onHide}>
         <ul>
-          {props.canRename ?<li onClick={props.onSelectRename}>Renombrar...</li>: null}
-          {props.canDelete ? <li onClick={props.onSelectDelete}>Borrar carpeta</li> : null}
+          {props.canRename ?<li onClick={props.onSelectRename}>Renombrar carpeta</li>: null}
+          {props.canDelete ? <li onClick={props.onSelectDelete}>Eliminar carpeta</li> : null}
           <li onClick={props.onSelectNewFile}>Nuevo archivo</li>
           <li onClick={props.onSelectNewFolder}>Nueva carpeta</li>
         </ul>

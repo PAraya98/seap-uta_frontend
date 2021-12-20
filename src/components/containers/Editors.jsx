@@ -7,7 +7,7 @@ export default class Editors extends React.Component {
   static propTypes = {
     rtModel: PropTypes.object.isRequired,
     port_machine: PropTypes.number.isRequired,
-    editable: PropTypes.bool.isRequired
+    rol: PropTypes.string.isRequired
   };
 
   constructor(props) {
@@ -42,7 +42,7 @@ export default class Editors extends React.Component {
         editors={this.state.editors}
         activeEditor={this.state.activeEditor}
         port_machine={this.props.port_machine}
-        editable={this.props.editable}
+        rol={this.props.rol}
       />
     );
   }

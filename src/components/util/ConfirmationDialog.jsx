@@ -22,8 +22,8 @@ export default class ConfirmationDialog extends React.Component {
   render() {
     let footer = (
       <div>
-        {this.props.onCancel !== null ? <button className="app-button" onClick={this.handleCancel}>Cancel</button>:null}
-        <button className="app-button" onClick={this.handleOk}>Ok</button>
+        {this.props.onCancel !== null ? <button className="app-button" onClick={this.handleCancel}>Cancelar</button>:null}
+        <button className="app-button" onClick={this.handleOk}>Aceptar</button>
       </div>);
 
     return (

@@ -88,6 +88,10 @@ i.fabutton.enabled:active {
 
 button.app-button {
   margin: 2px 5px;
+  height: 100%;
+  width: 100px;
+  font-size: 15px;
+  vertical-align: middle;
 }
 
 button.app-button:enabled {

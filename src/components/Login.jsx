@@ -1,44 +1,65 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { instanceOf } from "prop-types";
 import {Convergence} from '@convergence/convergence';
 import CenteredPanel from './CenteredPanel.jsx';
 import logo from "../assets/img/cl_logo.png";
+import { withCookies, Cookies } from "react-cookie";
 
-export default class Login extends React.Component {
+class Login extends React.Component {
 
   static propTypes = {
     domainUrl: PropTypes.string.isRequired,
-    onLogin: PropTypes.func
+    onLogin: PropTypes.func.isRequired,
+    cookies: instanceOf(Cookies).isRequired,
+    setCookies: PropTypes.func.isRequired
   };
 
   constructor(props) {
     super(props);
-
+    
     this.state = {
       inProgress: false,
       username: "",
       password: "",
-      anonymous: window.CodeEditorConfig.ANONYMOUS_AUTH
+      token: this.props.token,
+
     };
   }
+  
+  handleLogin = async () => { //TODO: VALIDAR CON API REST
 
-  handleLogin = () => {
     this.setState({inProgress: true});
 
-    let promise = null;
-
-    if (this.state.anonymous) {
-      promise = Convergence.connectAnonymously(this.props.domainUrl, this.state.username).then(d => {
-        this.props.onLogin(d);
+    
+    return new Promise(resolve => {
+      fetch('/ssh_handler/login', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          'username': this.state.username, 
+          'password': this.state.password
+        }),
+      }).then((response) => {
+        if(response.ok) {
+            return response.json();
+        } else {
+            this.setState({message: "Error en el servidor!", inProgress: false});
+        }
+      })
+      .then((json) => {
+        if(json.message === "Login correcto!")
+        { console.log(json.message);
+          this.props.setCookies(json);
+          resolve(Convergence.connectAnonymously(this.props.domainUrl, this.state.username).then(d => { this.props.onLogin(d) }));
+        }
+        else if (json.message === "Login incorrecto!")
+        { this.setState({message: json.message, inProgress: false});
+        }
       });
-    } else {
-      promise = Convergence.connect(this.props.domainUrl, this.state.username, this.state.password).then(d => {
-        this.props.onLogin(d);
-      });
-    }
-
-    promise.catch((e) => {
-      this.setState({message: e.message, inProgress: false});
     });
   }
 
@@ -60,8 +81,9 @@ export default class Login extends React.Component {
 
   validate = () => {
     return this.state.username.length > 0 &&
-      (this.state.password.length > 0 || this.state.anonymous);
+      (this.state.password.length > 0 || this.state.anonymous); 
   }
+
 
   render() {
     return (
@@ -73,7 +95,7 @@ export default class Login extends React.Component {
           </div>
           <div className="login-contents">
             <div>
-              <label>{this.state.anonymous ? "Nombre de usuario:" : "Username"}</label>
+              <label>Nombre de usuario</label>
               <input
                 type="text"
                 value={this.state.username}
@@ -81,7 +103,7 @@ export default class Login extends React.Component {
                 onKeyDown={this.handleKeyDown}
                 autoFocus />
             </div>
-            <div style={{display: this.state.anonymous ? "none" : "block"}}>
+            <div style={{display: "block"}}>
               <label>Contraseña</label>
               <input
                 type="password"
@@ -100,3 +122,5 @@ export default class Login extends React.Component {
     );
   }
 }
+
+export default withCookies(Login);

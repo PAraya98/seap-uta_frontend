@@ -9,7 +9,7 @@ export default class EditorTabs extends React.Component {
     activeEditor: PropTypes.object,
     editors: PropTypes.array.isRequired,
     port_machine: PropTypes.number.isRequired,
-    editable: PropTypes.bool.isRequired
+    rol: PropTypes.string.isRequired
   };
 
   handleTabClick = (editor) => {
@@ -40,7 +40,7 @@ export default class EditorTabs extends React.Component {
             fileName={editor.title}
             historical={editor.historical}
             port_machine={this.props.port_machine}
-            editable={this.props.editable}
+            rol={this.props.rol}
           />
         </div>
       );

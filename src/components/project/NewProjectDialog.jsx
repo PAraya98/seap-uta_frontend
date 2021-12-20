@@ -12,7 +12,9 @@ export default class NewProjectDialog extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      projectName: ""
+      projectName: "",
+      visibility: 1,
+      message: ""
     };
   }
 
@@ -20,12 +22,22 @@ export default class NewProjectDialog extends React.Component {
     this.setState({projectName: e.target.value});
   }
 
+  handleVisibilityInput = (e) => {
+    console.log(parseInt(e.target.value))
+    this.setState({visibility: parseInt(e.target.value)});
+  }
+
   handleCancel = () => {
     this.props.onCancel();
   }
 
   handleOk = () => {
-    this.props.onOk(this.state.projectName);
+    if(this.state.projectName === "")
+    { this.setState({message: "El nombre no puede estar vacío!"});
+    }
+    else
+    { this.props.onOk(this.state.projectName, this.state.visibility);
+    }
   }
 
 
@@ -35,11 +47,10 @@ export default class NewProjectDialog extends React.Component {
         <button className="app-button" onClick={this.handleCancel}>Cancelar</button>
         <button className="app-button" onClick={this.handleOk}>Aceptar</button>
       </div>);
-
     return (
       <Dialog
         className="new-project-dialog"
-        title="New Project"
+        title="Nuevo repositorio"
         footer={footer}
         visible
         wrapClassName=''
@@ -53,6 +64,14 @@ export default class NewProjectDialog extends React.Component {
           onChange={this.handleNameInput}
           value={this.state.projectName}
         />
+        <label> </label>
+        <label>Privacidad:</label>
+        <label><input className='radio' type="radio" value={1} name="visibility" defaultChecked={true} onChange={this.handleVisibilityInput}/> Público</label>
+        
+        <label><input className='radio' type="radio" value={0} name="visibility" onChange={this.handleVisibilityInput}/> Privado</label>
+        <div className="message">{this.state.message}</div>
+
+        
       </Dialog>
     );
   }

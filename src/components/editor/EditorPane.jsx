@@ -14,7 +14,7 @@ export default class EditorPane extends React.Component {
     fileName: PropTypes.string.isRequired,
     historical: PropTypes.bool.isRequired,
     port_machine: PropTypes.number.isRequired,
-    editable: PropTypes.bool.isRequired
+    rol: PropTypes.string.isRequired
   };
 
   constructor(props) {
@@ -68,7 +68,7 @@ export default class EditorPane extends React.Component {
           historical={this.props.historical}
           fileMode={mode.mode}
           port_machine={this.props.port_machine}
-          editable={this.props.editable}
+          rol={this.props.rol}
         />
         <StatusBar
           fileType={mode.caption}

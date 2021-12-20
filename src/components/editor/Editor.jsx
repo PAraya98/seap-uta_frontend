@@ -18,7 +18,7 @@ export default class Editor extends React.Component {
     model: PropTypes.object,
     onCursorMove: PropTypes.func.isRequired,
     port_machine: PropTypes.number.isRequired,
-    editable: PropTypes.bool.isRequired
+    rol: PropTypes.string.isRequired
 
   };
 
@@ -37,8 +37,7 @@ export default class Editor extends React.Component {
       const cursorPosition = this._editor.getCursorPosition();
       this.props.onCursorMove(cursorPosition);
     });
-    console.log(this.props.editable)
-    this._editor.setReadOnly(!this.props.editable);
+    this._editor.setReadOnly(this.props.rol === "Lector");
 
     const aceBinder = new AceBinder(this._editor, contentModel, !this.props.historical, this._radarViewElement, this.props.port_machine);
     aceBinder.bind();
