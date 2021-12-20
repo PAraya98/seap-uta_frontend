@@ -27,7 +27,7 @@ class Login extends React.Component {
     };
   }
   
-  handleLogin = async () => { //TODO: VALIDAR CON API REST
+  handleLogin = async () => {
 
     this.setState({inProgress: true});
 

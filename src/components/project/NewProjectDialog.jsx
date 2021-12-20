@@ -35,6 +35,9 @@ export default class NewProjectDialog extends React.Component {
     if(this.state.projectName === "")
     { this.setState({message: "El nombre no puede estar vacío!"});
     }
+    else if(this.state.projectName.length > 35)
+    { this.setState({message: "Nombre demasiado largo (hasta 35 caracteres)!"});
+    }
     else
     { this.props.onOk(this.state.projectName, this.state.visibility);
     }

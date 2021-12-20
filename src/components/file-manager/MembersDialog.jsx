@@ -87,7 +87,8 @@ export default class MembersDialog extends React.Component {
         }
       })
       .then((json) => {
-        if(json.message === "Miembro "+username+" ha sido definido como "+rol+".")
+        if(json.message === undefined);
+        else if(json.message === "Miembro "+username+" ha sido definido como "+rol+".")
         {   this._loadMembers();
             this.setState({message: json.message})
         }

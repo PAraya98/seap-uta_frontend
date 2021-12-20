@@ -76,7 +76,6 @@ export default class FileManager extends React.Component {
   }
 
   _createMembersDialog() {
-    console.log(this.state.visibleMembersDialog)
     if (this.state.visibleMembersDialog) {
       return (<MembersDialog
         title={"Miembros del repositorio"}

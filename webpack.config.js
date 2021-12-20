@@ -1,10 +1,13 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
-
+const webpack = require('webpack');
 const path = require('path');
+const dotenv = require('dotenv')
+
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV == 'production';
 
+dotenv.config();
 
 const config = {
     entry: './src/index.js',
@@ -16,8 +19,9 @@ const config = {
         host: 'localhost',
     },
     plugins: [
-        // Add your plugins here
-        // Learn more about plugins from https://webpack.js.org/configuration/plugins/
+        new webpack.ProvidePlugin({
+            process: 'process/browser',
+        })
     ],
     module: {
         rules: [

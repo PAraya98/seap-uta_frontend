@@ -27,7 +27,11 @@ class CodeEditor extends React.Component {
       loading: false,
       username: this.props.cookies.get("username") || "",
       token: this.props.cookies.get("token") || "",
-      rol: ""
+      rol: "",
+      modelId: "",
+      model: null,
+      chatRoom: null,
+      activity: null
     };
   }
 
@@ -82,14 +86,14 @@ class CodeEditor extends React.Component {
 
     closeAll();
 
-    this.setState({projectData: null, mv_started: null, rol: ""});
+    this.setState({projectData: null, mv_started: null, rol: "", modelId: "", model: null});
   }
 
   handleLogout = () => {
     this.props.cookies.remove("token", { path: '/' });
     this.props.cookies.remove("username", { path: '/' });
     this.state.domain.dispose();
-    this.setState({domain: null, projectData: null, user: "", token: ""});
+    this.setState({domain: null, projectData: null, user: "", token: "", modelId: ""});
   }
 
   setCookies = (json) =>
@@ -123,7 +127,7 @@ class CodeEditor extends React.Component {
     ])
     .then(() => {
         const projectData = {model, activity, chatRoom, user: model.session().user(), port_machine, rol};
-        this.setState({projectData, loading: false});
+        this.setState({projectData, loading: false, modelId: model.modelId(), rol: rol, model, chatRoom, activity});
         this.is_rol_changed();
       }).catch((e) => {
       console.error(e);
@@ -133,9 +137,9 @@ class CodeEditor extends React.Component {
   async is_rol_changed()
   { let bool = true;
     while(bool)
-    { 
-      await new Promise (async resolve => {setTimeout(() => resolve(), 5000)})
-      await new Promise(() => {
+    { console.log("OWO")
+      await new Promise (async resolve => {setTimeout(() => resolve(
+        
         fetch('/ssh_handler/get-rol', {
           method: 'POST',
           headers: {
@@ -144,7 +148,7 @@ class CodeEditor extends React.Component {
           },
           body: JSON.stringify({
             'token': this.state.token,
-            'modelId': this.state.projectData.model.modelId()
+            'modelId': this.state.modelId
           }),
         }).then((response) => {
           if(response.ok) {
@@ -154,19 +158,20 @@ class CodeEditor extends React.Component {
           }
         })
         .then((json) => {
-          if(json.rol === "ERROR")
-          {   this.handleClose()
+          if(json === undefined)
+          { console.log("q paso")
+          }
+          else if(json.rol === "ERROR")
+          {   window.location.reload();
               bool = false;
           }
-          else if (this.state.projectData.rol !== json.rol)
-          {   const projData = this.state.projectData;
-              projData.activity.leave();
-              projData.chatRoom.leave();
-              this.handleOpenProject(this.state.projectData.model)
+          else if (this.state.rol !== json.rol)
+          {   this.state.chatRoom.leave();
+              this.handleOpenProject(this.state.model)
               bool = false;
           }
-        });
-      })
+        })
+        ), 5000)})
     }
   }
 
@@ -233,7 +238,6 @@ class CodeEditor extends React.Component {
         }
       })
       .then((json) => {
-        console.log(json.message);
         resolve(json.message);
       });
     });

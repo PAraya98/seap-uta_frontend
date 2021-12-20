@@ -2,7 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './assets/sass/code-editor.scss';
 import CodeEditor from "./components/CodeEditor";
-
+if (module.hot) {
+  module.hot.accept();
+}
 
 if (typeof CodeEditorConfig !== "undefined") {
   const domainUrl = window.CodeEditorConfig.CONVERGENCE_URL;

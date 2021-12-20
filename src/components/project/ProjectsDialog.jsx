@@ -48,7 +48,7 @@ export default class ProjectsDialog extends React.Component {
     return false;
   }
 
-  _loadProjects() {
+  _loadProjects = () => {
     this.setState({loaded: false});
     new Promise(() => {
       fetch('/ssh_handler/repository_list', {
@@ -128,6 +128,7 @@ export default class ProjectsDialog extends React.Component {
         }
       })
       .then((json) => {
+        console.log(json)
         if(json.bool)
         {   this.setState({newProjectVisible: false});
             this.props.modelService.create({
@@ -292,9 +293,16 @@ export default class ProjectsDialog extends React.Component {
             <div className="buttons">
               <button disabled={this.state.selected === null} className="app-button" onClick={this.handleOpen}>Abrir
               </button>
-              <button className="app-button" onClick={this.handleNew}>Crear nuevo repositorio</button>
+              
+              <button className="app-button" onClick={this.handleNew}>Crear nuevo repositorio
+              </button>
+
               <button disabled={this.state.selected === null || !creador} className="app-button" onClick={this.handleDelete}>Borrar
               </button>
+
+              <button className="app-button" onClick={this._loadProjects}>Actualizar
+              </button>
+
             </div>
           </div>
 
